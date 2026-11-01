@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.syte.ai.android_sdk.data.CropCoordinates;
 import com.syte.ai.android_sdk.data.ImageSearch;
+import com.syte.ai.android_sdk.data.BoughtTogether;
 import com.syte.ai.android_sdk.data.Personalization;
 import com.syte.ai.android_sdk.data.ShopTheLook;
 import com.syte.ai.android_sdk.data.SimilarItems;
@@ -204,6 +205,18 @@ class SyteImpl extends Syte {
     public void getPersonalizedProductsAsync(Personalization personalization, SyteCallback<PersonalizationResult> callback) {
         verifyInitialized();
         mProductRecommendationClient.getPersonalizedProductsAsync(personalization, callback);
+    }
+
+    @Override
+    public SyteResult<PersonalizationResult> getBoughtTogether(BoughtTogether boughtTogether) {
+        verifyInitialized();
+        return mProductRecommendationClient.getBoughtTogether(boughtTogether);
+    }
+
+    @Override
+    public void getBoughtTogetherAsync(BoughtTogether boughtTogether, SyteCallback<PersonalizationResult> callback) {
+        verifyInitialized();
+        mProductRecommendationClient.getBoughtTogetherAsync(boughtTogether, callback);
     }
 
     @Override

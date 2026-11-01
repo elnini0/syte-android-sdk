@@ -5,6 +5,7 @@ import android.content.Context;
 import com.syte.ai.android_sdk.SyteCallback;
 import com.syte.ai.android_sdk.data.CropCoordinates;
 import com.syte.ai.android_sdk.data.ImageSearch;
+import com.syte.ai.android_sdk.data.BoughtTogether;
 import com.syte.ai.android_sdk.data.Personalization;
 import com.syte.ai.android_sdk.data.ShopTheLook;
 import com.syte.ai.android_sdk.data.SimilarItems;
@@ -228,6 +229,25 @@ public abstract class Syte {
      */
     public abstract void getPersonalizedProductsAsync(
             Personalization personalization,
+            SyteCallback<PersonalizationResult> callback
+    );
+
+    /**
+     * Make 'Frequently bought together' call: returns products that shoppers often buy together with the given ones,
+     * for example to fill a "complete your order" row in the cart.
+     * Synchronous method. Must NOT be called on the UI thread!
+     * @param boughtTogether {@link BoughtTogether}
+     * @return {@link SyteResult}
+     */
+    public abstract SyteResult<PersonalizationResult> getBoughtTogether(BoughtTogether boughtTogether);
+
+    /**
+     * Asynchronous equivalent for the {@link #getBoughtTogether(BoughtTogether)} method.
+     * @param boughtTogether {@link BoughtTogether}
+     * @param callback {@link SyteCallback}
+     */
+    public abstract void getBoughtTogetherAsync(
+            BoughtTogether boughtTogether,
             SyteCallback<PersonalizationResult> callback
     );
 

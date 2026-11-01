@@ -73,6 +73,22 @@ public class OfflineTest {
     }
 
     @Test
+    public void skuListsAreValidJson() {
+        // Unquoted SKUs like [AB-12] made the personalization API answer 400.
+        assertEquals("[\"AB-12\"]", Utils.viewedProductsJSONArray("AB-12"));
+        assertEquals("[\"AB-12\",\"CD-34\"]", Utils.skusJSONArray(Arrays.asList("AB-12", "CD-34")));
+        assertNull(Utils.skusJSONArray(Collections.emptyList()));
+    }
+
+    @Test
+    public void uploadedPhotoResponseIsRekeyed() {
+        // Uploaded photos come back keyed by a storage URL the SDK can't know in advance.
+        String response = "{\"https://uploads.example.com/abc_1\":[{\"label\":\"Coats\",\"offers\":\"https://x/offers\"}]}";
+        JsonObject normalized = JsonParser.parseString(SyteRemoteDataSource.normalizeBoundsJson(response)).getAsJsonObject();
+        assertEquals("Coats", normalized.getAsJsonArray("bounds").get(0).getAsJsonObject().get("label").getAsString());
+    }
+
+    @Test
     public void recommendationAndEventCallsGetKeyHeader() {
         assertEquals("key", RetrofitBuilder.apiKeyHeaderFor(HttpUrl.get("https://cdn-api.syteapi.com/v1.1/similars?account_id=1&sig=key")));
         assertEquals("key", RetrofitBuilder.apiKeyHeaderFor(HttpUrl.get("https://cdn-api.syteapi.com/v1.1/offers/bb?sig=key")));

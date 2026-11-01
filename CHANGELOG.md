@@ -4,6 +4,11 @@
 
 Refresh of the 2021 SDK for current Android tooling and the current Syte API.
 
+### Added
+
+- Frequently bought together recommendations.
+- Photo search uploads the photo straight to item detection in one call, as Syte's current docs describe, replacing the separate image upload service. Photo searches are reported as camera searches.
+
 ### Breaking
 
 - Shopper and session IDs move from encrypted shared preferences to plain app-private preferences. Apps upgrading from 1.x get a new shopper ID once.
@@ -17,6 +22,7 @@ Refresh of the 2021 SDK for current Android tooling and the current Syte API.
 - Autocomplete and popular searches returned an error when there were simply no results. They now return an empty result.
 - Search filter values with quotes produced malformed JSON. Filters are now serialized with Gson.
 - Search hits now include their `sku`.
+- Personalization sent SKUs as unquoted JSON, so any SKU with letters (most retailers' SKUs) got a 400 from the API.
 - Sample app builds again on current tooling and Android 12+ (explicit `exported` flag, no `switch` on resource IDs).
 
 ### Changed

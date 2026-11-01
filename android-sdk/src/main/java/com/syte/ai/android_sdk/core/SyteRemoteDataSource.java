@@ -6,9 +6,13 @@ import android.net.Uri;
 import android.util.Base64;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.syte.ai.android_sdk.SyteCallback;
 import com.syte.ai.android_sdk.data.CropCoordinates;
 import com.syte.ai.android_sdk.data.ImageSearch;
+import com.syte.ai.android_sdk.data.BoughtTogether;
 import com.syte.ai.android_sdk.data.Personalization;
 import com.syte.ai.android_sdk.data.ShopTheLook;
 import com.syte.ai.android_sdk.data.SimilarItems;
@@ -32,12 +36,13 @@ import com.syte.ai.android_sdk.util.SyteLogger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
-import org.json.JSONException;
+
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import okhttp3.MediaType;
@@ -53,27 +58,19 @@ class SyteRemoteDataSource extends BaseRemoteDataSource {
     private static final String TAG = SyteRemoteDataSource.class.getSimpleName();
 
     private static final String SYTE_URL = "https://cdn-api.syteapi.com";
-    private static final String EXIF_REMOVAL_URL = "https://imagemod.syteapi.com";
 
     private interface BoundsResultCallback {
         void onResult(SyteResult<BoundsResult> result);
     }
 
-    private interface ExifRemovalResultCallback {
-        void onResult(UrlImageSearch requestData, Throwable e);
-    }
-
     private final SyteService mSyteService;
-    private final ExifRemovalService mExifRemovalService;
     private final RecommendationRemoteDataSource mRecommendationRemoteDataSource;
     private final TextSearchRemoteDataSource mTextSearchRemoteDataSource;
 
     SyteRemoteDataSource(SyteConfiguration configuration) {
         Retrofit retrofit = RetrofitBuilder.build(SYTE_URL);
-        Retrofit exifRemovalRetrofit = RetrofitBuilder.build(EXIF_REMOVAL_URL);
 
         mSyteService = retrofit.create(SyteService.class);
-        mExifRemovalService = exifRemovalRetrofit.create(ExifRemovalService.class);
         mRecommendationRemoteDataSource = new RecommendationRemoteDataSource(mSyteService, configuration);
         mTextSearchRemoteDataSource = new TextSearchRemoteDataSource(mSyteService, configuration);
 
@@ -162,6 +159,19 @@ class SyteRemoteDataSource extends BaseRemoteDataSource {
         );
     }
 
+    SyteResult<PersonalizationResult> getBoughtTogether(BoughtTogether boughtTogether) {
+        renewTimestamp();
+        return mRecommendationRemoteDataSource.getBoughtTogether(boughtTogether);
+    }
+
+    void getBoughtTogetherAsync(
+            BoughtTogether boughtTogether,
+            SyteCallback<PersonalizationResult> callback
+    ) {
+        renewTimestamp();
+        mRecommendationRemoteDataSource.getBoughtTogetherAsync(boughtTogether, callback);
+    }
+
     SyteResult<SytePlatformSettings> initialize() {
         renewTimestamp();
         Response<ResponseBody> response = null;
@@ -236,6 +246,7 @@ class SyteRemoteDataSource extends BaseRemoteDataSource {
                 mConfiguration.getApiSignature(),
                 requestData.getPersonalizedRanking() ? mConfiguration.getUserId() : null,
                 requestData.getPersonalizedRanking() ? stringSessionId: null,
+                requestData.getProductType().name,
                 requestData.getProductType().name,
                 mConfiguration.getLocale(),
                 stringCatalog,
@@ -373,9 +384,8 @@ class SyteRemoteDataSource extends BaseRemoteDataSource {
 
         String modifiedResponseString = null;
         try {
-            modifiedResponseString =
-                    response.body().string().replace(requestData.getImageUrl(), "bounds");
-        } catch (IOException e) {
+            modifiedResponseString = normalizeBoundsJson(response.body().string());
+        } catch (IOException | RuntimeException e) {
             if (resultCallback != null) {
                 resultCallback.onResult(handleException(response, e));
             }
@@ -520,20 +530,20 @@ class SyteRemoteDataSource extends BaseRemoteDataSource {
             Context context,
             ImageSearch requestData
     ) {
-
-        ImageSearchClientImpl imageSearchClient = new ImageSearchClientImpl(
-                this
-        );
-        UrlImageSearch urlImageSearch;
+        renewTimestamp();
+        UrlImageSearch uploadRequest = uploadRequestFor(requestData);
+        Response<ResponseBody> response = null;
         try {
-            urlImageSearch = prepareImageSearchRequestData(
-                    context,
-                    requestData
+            response = generateUploadCall(uploadRequest, prepareImage(context, requestData)).execute();
+            return onBoundsResult(uploadRequest,
+                    response,
+                    uploadRequest.getFirstBoundItemsCoordinates(),
+                    true,
+                    null
             );
         } catch (Exception e) {
-            return handleException(null, e);
+            return handleException(response, e);
         }
-        return imageSearchClient.getBounds(urlImageSearch);
     }
 
     void getBoundsWildAsync(
@@ -541,119 +551,81 @@ class SyteRemoteDataSource extends BaseRemoteDataSource {
             ImageSearch requestData,
             SyteCallback<BoundsResult> callback
     ) {
-        ImageSearchClientImpl imageSearchClient = new ImageSearchClientImpl(
-                this
-        );
-        prepareImageSearchRequestDataAsync(
-                context,
-                requestData,
-                new ExifRemovalResultCallback() {
-                    @Override
-                    public void onResult(UrlImageSearch requestData, Throwable e) {
-                        if (e != null) {
-                            callback.onResult(handleException(null, e));
-                        } else {
-                            imageSearchClient.getBoundsAsync(requestData, callback);
-                        }
-                    }
-                }
-        );
-    }
-
-    private UrlImageSearch prepareImageSearchRequestData(
-            Context context,
-            ImageSearch requestData
-    ) throws IOException, JSONException, SyteGeneralException {
-
-        byte[] bytes = prepareImage(context, requestData);
-
-        RequestBody requestBody = RequestBody.create(MediaType.parse("image/jpg"), bytes);
-
-        Response<ResponseBody> response = mExifRemovalService.removeTags(
-                mConfiguration.getAccountId(),
-                mConfiguration.getApiSignature(),
-                requestBody
-        ).execute();
-        ResponseBody body = response.body();
-
-        if (body != null) {
-            JSONObject jsonObject = new JSONObject(body.string());
-            UrlImageSearch urlImageSearch = new UrlImageSearch(
-                    jsonObject.getString("url"),
-                    SyteProductType.DISCOVERY_BUTTON
-            );
-            urlImageSearch.setRetrieveItemsForTheFirstBound(
-                    requestData.isRetrieveItemsForTheFirstBound()
-            );
-            urlImageSearch.setFirstBoundItemsCoordinates(
-                    requestData.getFirstBoundItemsCoordinates()
-            );
-            urlImageSearch.setPersonalizedRanking(
-                    requestData.getPersonalizedRanking()
-            );
-            return urlImageSearch;
-        } else {
-            throw new SyteGeneralException("Exif removal service returned empty body.");
-        }
-    }
-
-    private void prepareImageSearchRequestDataAsync(
-            Context context,
-            ImageSearch requestData,
-            ExifRemovalResultCallback callback
-    ) {
-        byte[] bytes = new byte[0];
+        renewTimestamp();
+        UrlImageSearch uploadRequest = uploadRequestFor(requestData);
+        byte[] bytes;
         try {
             bytes = prepareImage(context, requestData);
         } catch (Exception e) {
-            callback.onResult(null, e);
+            callback.onResult(handleException(null, e));
+            return;
         }
-        RequestBody requestBody = RequestBody.create(MediaType.parse("image/jpg"), bytes);
-
-        mExifRemovalService.removeTags(
-                mConfiguration.getAccountId(),
-                mConfiguration.getApiSignature(),
-                requestBody
-        ).enqueue(new Callback<ResponseBody>() {
+        generateUploadCall(uploadRequest, bytes).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(@NotNull Call<ResponseBody> call, @NotNull Response<ResponseBody> response) {
-                ResponseBody body = response.body();
-                if (body != null) {
-                    try {
-                        JSONObject jsonObject = new JSONObject(body.string());
-                        UrlImageSearch urlImageSearch = new UrlImageSearch(
-                                jsonObject.getString("url"),
-                                SyteProductType.DISCOVERY_BUTTON
-                        );
-                        urlImageSearch.setRetrieveItemsForTheFirstBound(
-                                requestData.isRetrieveItemsForTheFirstBound()
-                        );
-                        urlImageSearch.setFirstBoundItemsCoordinates(
-                                requestData.getFirstBoundItemsCoordinates()
-                        );
-                        urlImageSearch.setPersonalizedRanking(
-                                requestData.getPersonalizedRanking()
-                        );
-                        callback.onResult(urlImageSearch, null);
-                    } catch (IOException | JSONException e) {
-                        callback.onResult(null, e);
-                    }
-                } else if (response.errorBody() != null) {
-                    try {
-                        callback.onResult(null, new SyteGeneralException(response.errorBody().string()));
-                    } catch (IOException e) {
-                        callback.onResult(null, e);
-                    }
-                } else {
-                    callback.onResult(null, new SyteGeneralException("Error while making request to the EXIF tag removal service."));
+            public void onResponse(@NotNull Call<ResponseBody> call,
+                                   @NotNull Response<ResponseBody> response) {
+                try {
+                    onBoundsResult(
+                            uploadRequest,
+                            response,
+                            uploadRequest.getFirstBoundItemsCoordinates(),
+                            false,
+                            callback::onResult);
+                } catch (IOException e) {
+                    callback.onResult(handleException(response, e));
                 }
             }
 
             @Override
             public void onFailure(@NotNull Call<ResponseBody> call, @NotNull Throwable t) {
-                callback.onResult(null, t);
+                callback.onResult(handleOnFailure(t));
             }
         });
+    }
+
+    /**
+     * Photo searches go straight to item detection; this carries the photo search's options
+     * through the same result handling as image URL searches.
+     */
+    private UrlImageSearch uploadRequestFor(ImageSearch requestData) {
+        UrlImageSearch uploadRequest = new UrlImageSearch("", SyteProductType.CAMERA);
+        uploadRequest.setRetrieveItemsForTheFirstBound(requestData.isRetrieveItemsForTheFirstBound());
+        uploadRequest.setFirstBoundItemsCoordinates(requestData.getFirstBoundItemsCoordinates());
+        uploadRequest.setPersonalizedRanking(requestData.getPersonalizedRanking());
+        return uploadRequest;
+    }
+
+    private Call<ResponseBody> generateUploadCall(UrlImageSearch requestData, byte[] image) {
+        Long sessionId = mConfiguration.getSessionId();
+        String stringSessionId = sessionId == -1L ? "OptedOut" : Long.toString(sessionId);
+        return mSyteService.uploadImageForBounds(
+                mConfiguration.getAccountId(),
+                mConfiguration.getApiSignature(),
+                requestData.getPersonalizedRanking() ? mConfiguration.getUserId() : null,
+                requestData.getPersonalizedRanking() ? stringSessionId : null,
+                requestData.getProductType().name,
+                requestData.getProductType().name,
+                mConfiguration.getLocale(),
+                null,
+                requestData.getPersonalizedRanking() && mConfiguration.isLocalStorageEnabled() ?
+                        Utils.viewedProductsString(mConfiguration.getViewedProducts()) : null,
+                "image_bin",
+                RequestBody.create(MediaType.parse("application/octet-stream"), image)
+        );
+    }
+
+    /**
+     * Detection responses are keyed by the image's URL, which for uploaded photos isn't known
+     * in advance. Re-key the single entry as "bounds" so it maps onto {@link BoundsResult}.
+     */
+    static String normalizeBoundsJson(String responseString) {
+        JsonObject json = JsonParser.parseString(responseString).getAsJsonObject();
+        JsonObject normalized = new JsonObject();
+        for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
+            normalized.add("bounds", entry.getValue());
+            break;
+        }
+        return normalized.toString();
     }
 
     @Override

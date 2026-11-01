@@ -127,14 +127,26 @@ To use the "Recommendations" functionality, do the following:
 1. Use Syte class instance to get results for different features:
 
 *   `SyteResult<SimilarProductsResult> getSimilarProducts(
-        SimilarProducts similarProducts
+        SimilarItems similarItems
     );`
 *   `SyteResult<ShopTheLookResult> getShopTheLook(
         ShopTheLook shopTheLook
     );`
-*   `SyteResult<PersonalizationResult> getPersonalization(
+*   `SyteResult<PersonalizationResult> getPersonalizedProducts(
         Personalization personalization
     );`
+*   `SyteResult<PersonalizationResult> getBoughtTogether(
+        BoughtTogether boughtTogether
+    );`
+
+Each has an `...Async` version that takes a `SyteCallback`.
+
+"Frequently bought together" takes the SKUs in the shopper's cart, or the product they're looking at:
+
+```java
+SyteResult<PersonalizationResult> result =
+        syte.getBoughtTogether(new BoughtTogether(Collections.singletonList("ABC123")));
+```
     
 **NOTE:** You must add at least one product ID to use the "Personalization" functionality. To do this use the **Syte.addViewedProduct(String)** method.
 

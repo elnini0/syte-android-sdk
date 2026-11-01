@@ -24,12 +24,26 @@ public interface SyteService {
                                  @Query("syte_uuid") String userId,
                                  @Query("session_id") String sessionId,
                                  @Query("syte_app_ref") String syteAppRef,
+                                 @Query("syte_product") String syteProduct,
                                  @Query("locale") String locale,
                                  @Query("catalog") String catalog,
                                  @Query("sku") String sku,
                                  @Query("imageUrl") String imageUrl,
                                  @Query("session_skus") String sessionSkus,
                                  @QueryMap Map<String, String> options);
+
+    @POST("v1.1/offers/bb")
+    Call<ResponseBody> uploadImageForBounds(@Query("account_id") String accountId,
+                                            @Query("sig") String signature,
+                                            @Query("syte_uuid") String userId,
+                                            @Query("session_id") String sessionId,
+                                            @Query("syte_app_ref") String syteAppRef,
+                                            @Query("syte_product") String syteProduct,
+                                            @Query("locale") String locale,
+                                            @Query("catalog") String catalog,
+                                            @Query("session_skus") String sessionSkus,
+                                            @Query("payload_type") String payloadType,
+                                            @Body RequestBody image);
 
     @GET
     Call<ResponseBody> getOffers(

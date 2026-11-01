@@ -2,6 +2,7 @@ package com.syte.ai.android_sdk.core;
 
 import com.google.gson.Gson;
 import com.syte.ai.android_sdk.SyteCallback;
+import com.syte.ai.android_sdk.data.BoughtTogether;
 import com.syte.ai.android_sdk.data.Personalization;
 import com.syte.ai.android_sdk.data.ShopTheLook;
 import com.syte.ai.android_sdk.data.SimilarItems;
@@ -18,6 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Map;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -31,7 +33,8 @@ class RecommendationRemoteDataSource extends BaseRemoteDataSource {
     enum RecommendationProduct {
         SIMILAR_PRODUCTS("similars"),
         SHOP_THE_LOOK("ctl"),
-        PERSONALIZATION("personalization");
+        PERSONALIZATION("personalization"),
+        BOUGHT_TOGETHER("bought_together");
 
         private final String mName;
 
@@ -334,26 +337,99 @@ class RecommendationRemoteDataSource extends BaseRemoteDataSource {
         String viewedProducts = Utils.viewedProductsJSONArray(mConfiguration.getViewedProducts());
         viewedProducts = viewedProducts == null ? Utils.viewedProductsJSONArray(personalization.getSku()) : viewedProducts;
 
+        return personalizationCall(
+                RecommendationProduct.PERSONALIZATION,
+                viewedProducts,
+                personalization.getModelVersion(),
+                personalization.getFieldsToReturn().getName(),
+                personalization.getLimit(),
+                personalization.getSyteUrlReferer(),
+                personalization.getOptions()
+        );
+    }
+
+    public SyteResult<PersonalizationResult> getBoughtTogether(BoughtTogether boughtTogether) {
+        Response<ResponseBody> result = null;
+        try {
+            result = generateBoughtTogetherCall(boughtTogether).execute();
+            return onPersonalizationResult(result);
+        } catch (IOException | JSONException | SyteWrongInputException e) {
+            return handleException(result, e);
+        }
+    }
+
+    public void getBoughtTogetherAsync(
+            BoughtTogether boughtTogether,
+            SyteCallback<PersonalizationResult> callback) {
+        try {
+            generateBoughtTogetherCall(boughtTogether).enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(@NotNull Call<ResponseBody> call, @NotNull Response<ResponseBody> response) {
+                    try {
+                        callback.onResult(onPersonalizationResult(response));
+                    } catch (IOException | JSONException e) {
+                        callback.onResult(handleException(response, e));
+                    }
+                }
+
+                @Override
+                public void onFailure(@NotNull Call<ResponseBody> call, @NotNull Throwable t) {
+                    callback.onResult(handleOnFailure(t));
+                }
+            });
+        } catch (SyteWrongInputException e) {
+            callback.onResult(handleException(null, e));
+        }
+    }
+
+    private Call<ResponseBody> generateBoughtTogetherCall(BoughtTogether boughtTogether) throws SyteWrongInputException {
+        String skus = Utils.skusJSONArray(boughtTogether.getSkus());
+        if (skus == null) {
+            throw new SyteWrongInputException("Pass at least one SKU to get frequently bought together items.");
+        }
+        return personalizationCall(
+                RecommendationProduct.BOUGHT_TOGETHER,
+                skus,
+                boughtTogether.getModelVersion(),
+                boughtTogether.getFieldsToReturn().getName(),
+                boughtTogether.getLimit(),
+                boughtTogether.getSyteUrlReferer(),
+                boughtTogether.getOptions()
+        );
+    }
+
+    /**
+     * Personalized recommendations and frequently-bought-together items share one endpoint.
+     */
+    private Call<ResponseBody> personalizationCall(
+            RecommendationProduct product,
+            String sessionSkus,
+            String modelVersion,
+            String fields,
+            int limit,
+            String syteUrlReferer,
+            Map<String, String> options
+    ) {
         MediaType mediaType = MediaType.parse("text/plain");
         RequestBody body =
                 RequestBody.create(mediaType,
                         "{\n    " +
                                     "\"user_uuid\": \"" + mConfiguration.getUserId() + "\",\n    " +
-                                    "\"session_skus\": " + viewedProducts + ",\n    " +
-                                    "\"model_version\": \"" + personalization.getModelVersion() + "\"" +
+                                    "\"session_skus\": " + sessionSkus + ",\n    " +
+                                    "\"model_version\": \"" + modelVersion + "\"" +
                                 "\n}");
         return mSyteService.getPersonalization(
                 mConfiguration.getAccountId(),
                 mConfiguration.getApiSignature(),
-                RecommendationProduct.PERSONALIZATION.getName(),
+                product.getName(),
                 mConfiguration.getLocale(),
-                personalization.getFieldsToReturn().getName(),
-                RecommendationProduct.PERSONALIZATION.getName(),
-                RecommendationProduct.PERSONALIZATION.getName(),
-                personalization.getLimit(),
-                personalization.getSyteUrlReferer(),
+                fields,
+                product.getName(),
+                product.getName(),
+                limit,
+                syteUrlReferer,
                 body,
-                personalization.getOptions()
+                options
         );
     }
 

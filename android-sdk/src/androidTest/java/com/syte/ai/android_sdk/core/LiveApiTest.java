@@ -12,6 +12,7 @@ import android.os.Bundle;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.syte.ai.android_sdk.SyteCallback;
+import com.syte.ai.android_sdk.data.BoughtTogether;
 import com.syte.ai.android_sdk.data.ImageSearch;
 import com.syte.ai.android_sdk.data.Personalization;
 import com.syte.ai.android_sdk.data.ShopTheLook;
@@ -131,6 +132,7 @@ public class LiveApiTest {
         }
         BoundsResult bounds = ok(mSyte.getBoundsForImage(context, new ImageSearch(photo)));
         assertFalse(bounds.getBounds().isEmpty());
+        assertFalse(bounds.getItemsForFirstBound().getItems().isEmpty());
     }
 
     @Test
@@ -138,6 +140,7 @@ public class LiveApiTest {
         HitsItem hit = firstHit();
         assertFalse(ok(mSyte.getSimilarProducts(new SimilarItems(hit.getSku(), hit.getImageUrl()))).getItems().isEmpty());
         assertNotNull(ok(mSyte.getShopTheLook(new ShopTheLook(hit.getSku(), hit.getImageUrl()))).getItems());
+        assertFalse(ok(mSyte.getBoughtTogether(new BoughtTogether(Collections.singletonList(hit.getSku())))).getItems().isEmpty());
         mSyte.addViewedProduct(hit.getSku());
         assertFalse(ok(mSyte.getPersonalizedProducts(new Personalization())).getItems().isEmpty());
     }

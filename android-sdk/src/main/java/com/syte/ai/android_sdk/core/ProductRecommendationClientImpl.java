@@ -2,6 +2,7 @@ package com.syte.ai.android_sdk.core;
 
 
 import com.syte.ai.android_sdk.SyteCallback;
+import com.syte.ai.android_sdk.data.BoughtTogether;
 import com.syte.ai.android_sdk.data.Personalization;
 import com.syte.ai.android_sdk.data.ShopTheLook;
 import com.syte.ai.android_sdk.data.result.SyteResult;
@@ -128,6 +129,21 @@ class ProductRecommendationClientImpl {
                     }
                 }
         );
+    }
+
+    public SyteResult<PersonalizationResult> getBoughtTogether(BoughtTogether boughtTogether) {
+        return mSyteRemoteDataSource.getBoughtTogether(boughtTogether);
+    }
+
+    public void getBoughtTogetherAsync(
+            BoughtTogether boughtTogether,
+            SyteCallback<PersonalizationResult> callback
+    ) {
+        mSyteRemoteDataSource.getBoughtTogetherAsync(boughtTogether, result -> {
+            if (callback != null) {
+                callback.onResult(result);
+            }
+        });
     }
 
 }

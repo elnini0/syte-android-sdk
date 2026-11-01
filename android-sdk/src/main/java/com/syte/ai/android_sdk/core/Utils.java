@@ -11,6 +11,8 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,30 +46,21 @@ class Utils {
     }
 
     static String viewedProductsJSONArray(Set<String> viewedProducts) {
-        if (viewedProducts.isEmpty()) {
-            return null;
-        }
-
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("[");
-        for (String sku : viewedProducts) {
-            stringBuilder.append("\"");
-            stringBuilder.append(sku);
-            stringBuilder.append("\"");
-            stringBuilder.append(",");
-        }
-        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-        stringBuilder.append("]");
-
-        return stringBuilder.toString();
+        return skusJSONArray(new ArrayList<>(viewedProducts));
     }
 
     static String viewedProductsJSONArray(String sku) {
         if (sku == null) {
             return null;
         }
+        return skusJSONArray(Collections.singletonList(sku));
+    }
 
-        return String.format("[%s]", sku);
+    static String skusJSONArray(List<String> skus) {
+        if (skus == null || skus.isEmpty()) {
+            return null;
+        }
+        return new Gson().toJson(skus);
     }
 
     static String generateFiltersString(Map<String, List<String>> filters) {
