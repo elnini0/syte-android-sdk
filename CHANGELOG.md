@@ -24,5 +24,6 @@ Refresh of the 2021 SDK for current Android tooling and the current Syte API.
 - Compiles against Android 16 (API 36).
 - Calls go to `cdn-api.syteapi.com`, the host in Syte's current API docs.
 - Visual search, recommendation and event calls also send the API key in the `x-api-key` header, as the docs describe. Text search keeps the `sig` parameter, since those endpoints reject the header.
+- Removed the manual AAR zip distribution; install through JitPack.
 - Dropped the deprecated `androidx.security:security-crypto` dependency and the shut-down JCenter repository. Updated Retrofit, Gson, OkHttp and ExifInterface.
 - Added offline unit tests, and live device tests that run against a real account when credentials are passed in.

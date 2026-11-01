@@ -26,8 +26,6 @@ dependencies {
 }
 ```
 
-JitPack only builds public repositories on its free plan. While this repository is private, build the library locally (`./gradlew :android-sdk:publishToMavenLocal`) and add `mavenLocal()` to your repositories instead.
-
 Shrinking with R8 (`minifyEnabled true`) needs no extra rules: the library ships its own.
 
 ## Running the tests
