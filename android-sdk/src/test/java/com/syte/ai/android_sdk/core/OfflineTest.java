@@ -1,14 +1,17 @@
 package com.syte.ai.android_sdk.core;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.syte.ai.android_sdk.events.BaseSyteEvent;
+import com.syte.ai.android_sdk.events.EventBBShowResults;
 import com.syte.ai.android_sdk.events.EventCheckoutComplete;
 import com.syte.ai.android_sdk.events.EventCheckoutStart;
+import com.syte.ai.android_sdk.events.EventOfferClick;
 import com.syte.ai.android_sdk.events.EventProductsAddedToCart;
 import com.syte.ai.android_sdk.events.Product;
 
@@ -86,6 +89,28 @@ public class OfflineTest {
         String response = "{\"https://uploads.example.com/abc_1\":[{\"label\":\"Coats\",\"offers\":\"https://x/offers\"}]}";
         JsonObject normalized = JsonParser.parseString(SyteRemoteDataSource.normalizeBoundsJson(response)).getAsJsonObject();
         assertEquals("Coats", normalized.getAsJsonArray("bounds").get(0).getAsJsonObject().get("label").getAsString());
+        assertEquals("https://uploads.example.com/abc_1", normalized.get("imageUrl").getAsString());
+    }
+
+    @Test
+    public void resultsEventCarriesShownSkusAndBound() {
+        EventBBShowResults event = new EventBBShowResults("https://example.com/a.jpg", "dresses", 2, "camera",
+                Arrays.asList("A1", "B2"), "PDP-1", 0);
+        JsonObject body = JsonParser.parseString(event.getRequestBodyString()).getAsJsonObject();
+        assertEquals("Syte expects one comma-separated string", "A1,B2", body.get("skus").getAsString());
+        assertEquals("PDP-1", body.get("sku").getAsString());
+        assertEquals(0, body.get("bound_index").getAsInt());
+    }
+
+    @Test
+    public void offerClickCarriesSourceOnlyWhenKnown() {
+        EventOfferClick withSource = new EventOfferClick("A1", 1, "camera", "PDP-1", "https://example.com/p/a1");
+        JsonObject body = JsonParser.parseString(withSource.getRequestBodyString()).getAsJsonObject();
+        assertEquals("PDP-1", body.get("source_sku").getAsString());
+        assertEquals("https://example.com/p/a1", body.get("target_url").getAsString());
+
+        EventOfferClick plain = new EventOfferClick("A1", 1, "camera");
+        assertFalse(plain.getRequestBodyString().contains("source_sku"));
     }
 
     @Test

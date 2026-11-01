@@ -9,6 +9,10 @@ Refresh of the 2021 SDK for current Android tooling and the current Syte API.
 - Frequently bought together recommendations.
 - Recently viewed products (get, remove, merge histories), merchandising collections and shoppable galleries. Built from Syte's API docs and not yet tested against a live account.
 - Photo search uploads the photo straight to item detection in one call, as Syte's current docs describe, replacing the separate image upload service. Photo searches are reported as camera searches.
+- `syte-ui`, an optional Jetpack Compose library in this repo: product carousels, photo search and text search screens that send Syte's events on their own, with a theme and replaceable product cards. See the README.
+- A demo app built from `syte-ui`, with a walkthrough test that screenshots every screen.
+- Visual search results and click events can carry the result SKUs, the product the search started from, the detected item's index and the link clicked, as Syte's event docs describe.
+- Detection results include the link to the searched image. For photos that's Syte's stored copy, so visual search events from photos have an image link too.
 
 ### Breaking
 

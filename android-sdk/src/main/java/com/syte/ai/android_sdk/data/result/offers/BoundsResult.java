@@ -19,12 +19,25 @@ public class BoundsResult {
 
 	private ItemsResult firstBoundItemsResult = null;
 
+	@SerializedName("imageUrl")
+	private String imageUrl;
+
 	/**
 	 * Getter for the returned bounds.
 	 * @return list of retrieved bounds.
 	 */
 	public List<Bound> getBounds() {
 		return bounds;
+	}
+
+	/**
+	 * The image the bounds were detected in. For photo searches this is the copy Syte stored,
+	 * which expires after a while. Send it as the image URL in visual search events.
+	 * @return link to the searched image
+	 */
+	@Nullable
+	public String getImageUrl() {
+		return imageUrl;
 	}
 
 	/**

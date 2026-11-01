@@ -1,6 +1,6 @@
 ## Syte Android SDK
 
-Data-only client for Syte's product discovery API: visual search, similar items, Shop the Look, personalized recommendations, text search and event tracking. It returns data; your app draws the screens.
+Client for Syte's product discovery API: visual search, similar items, Shop the Look, personalized recommendations, text search and event tracking. The SDK returns data for your own screens. The optional UI kit adds ready-made Jetpack Compose screens on top of it, see [UI kit](#ui-kit).
 
 Requires Android 5.0 (API 21) or higher. Built with Android Gradle Plugin 9.5 against Android 16 (API 36). See [CHANGELOG.md](CHANGELOG.md) for what changed in 2.0.
 
@@ -28,18 +28,114 @@ dependencies {
 
 Shrinking with R8 (`minifyEnabled true`) needs no extra rules: the library ships its own.
 
+## UI kit
+
+`syte-ui` is a second library in this repo: Jetpack Compose views that call Syte, show the results, and send Syte's events on their own. It includes the SDK, so add it instead of the SDK line above:
+
+```groovy
+dependencies {
+    implementation 'com.github.elnini0.syte-android-sdk:syte-android-ui:2.0.0'
+}
+```
+
+Needs Android 6.0 (API 23) or higher, and your app must compile against API 37, which current Compose libraries require.
+
+- `SyteProductCarousel` is a titled row of similar items, Shop the Look, personalized picks, frequently bought together, recently viewed or a merchandising collection. It shows placeholder cards while loading and hides itself when there's nothing to show.
+- `SyteVisualSearch` asks for a photo (camera or gallery), marks the items Syte finds, and shows results for the one the shopper taps. Given an image URL, it searches that image right away, for a "find similar" button on a product page.
+- `SyteSearch` has a search box with recent and popular searches, suggestions while typing, and a results grid that loads more as the shopper scrolls.
+- The pieces they're built from are public too: `SyteProductCard`, `SyteProductImage`, `SytePrice`, and `syteProducts` for adding products to your own `LazyVerticalGrid`.
+
+Create the service once and wrap your content in `SyteUi`:
+
+```kotlin
+class ShopActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val syte = Syte.newInstance(SyteConfiguration(this, "<account id>", "<api key>"))
+        val service = SyteLiveService(this, syte)
+        setContent {
+            MaterialTheme {
+                SyteUi(service) { ShopScreen() }
+            }
+        }
+    }
+}
+```
+
+Then drop the views where they belong. Each takes a lambda for when the shopper picks a product:
+
+```kotlin
+SyteProductCarousel(SyteRecommendation.Similar(product.sku, product.imageUrl), title = "You may also like") { picked ->
+    openProduct(picked.sku)
+}
+
+SyteVisualSearch { picked -> openProduct(picked.sku) }
+
+SyteSearch { picked -> openProduct(picked.sku) }
+```
+
+Pass your own card to match your product tiles:
+
+```kotlin
+SyteProductCarousel(
+    SyteRecommendation.BoughtTogether(cart.skus),
+    title = "Complete your order",
+    card = { product -> MyProductTile(product) },
+) { picked -> cart.add(picked.sku) }
+```
+
+Colors and type follow your `MaterialTheme`, so dark mode works out of the box. Sizes and every piece of text can be changed:
+
+```kotlin
+val theme = SyteTheme.fromMaterialTheme().copy(
+    cornerRadius = 4.dp,
+    strings = SyteUiStrings(searchPlaceholder = "Rechercher"),
+)
+SyteUi(service, theme) { ShopScreen() }
+```
+
+Photos taken with the camera go through a file provider the kit registers, so the app needs no setup for it. If your app declares the `CAMERA` permission, Android requires it to be granted before the camera opens, so ask for it before showing photo search. Choosing from the gallery uses the system photo picker and needs no permission.
+
+### Events the views send
+
+- Similar items and Shop the Look rows: when the row is shown, and each product click.
+- Photo search: camera button shown and tapped, items found, item tapped, results shown, result clicked. Clicks carry the product the search started from and the link clicked, when known.
+- Search: when results are shown, with whether the query was typed, a recent search or a popular one.
+
+Personalized, bought together, recently viewed and collection rows send nothing, and neither do clicks on search results: Syte documents no events for them. Page views, add to cart and purchases stay your app's job, as in the [events section](#data-collection).
+
+### Previews and tests
+
+`SytePreviewService` returns made-up products with no network calls and keeps every event it's sent, for previews and unit tests. Products, search box and item markers carry the test tags `syte.product`, `syte.carousel.product`, `syte.search.field` and `syte.marker` for UI tests.
+
+### Demo app
+
+The `demo` module is a small shop built from the kit: search, product pages with all three recommendation rows, photo search and a "For you" tab. It runs on made-up products. To use your catalog, add `syte.accountId`, `syte.apiKey` and optionally `syte.locale` to `local.properties`, which stays out of git.
+
+The demo's walkthrough test visits every screen and saves a screenshot of each step on the device, under the app's files in `walkthrough/`:
+
+```
+./gradlew :demo:connectedDebugAndroidTest \
+    -Pandroid.testInstrumentationRunnerArguments.syteAccountId=<account id> \
+    -Pandroid.testInstrumentationRunnerArguments.syteApiKey=<api key> \
+    -Pandroid.injected.androidTest.leaveApksInstalledAfterRun=true
+adb pull /sdcard/Android/data/com.github.elnini0.sytedemo/files/walkthrough
+```
+
+The photo step expects a photo in the device's gallery.
+
 ## Running the tests
 
 Offline tests:
 
 ```
-./gradlew :android-sdk:testDebugUnitTest
+./gradlew :android-sdk:testDebugUnitTest :syte-ui:testDebugUnitTest
 ```
 
 Live tests run on a device or emulator against a real account, and are skipped without one:
 
 ```
-./gradlew :android-sdk:connectedDebugAndroidTest \
+./gradlew :android-sdk:connectedDebugAndroidTest :syte-ui:connectedDebugAndroidTest \
     -Pandroid.testInstrumentationRunnerArguments.syteAccountId=<account id> \
     -Pandroid.testInstrumentationRunnerArguments.syteApiKey=<api key>
 ```
@@ -190,7 +286,7 @@ Personalized ranking is disabled by default.
 
 The SDK can be used to fire various events to Syte. Example:
 
-    syte.fireEvent(new EventCheckoutStart());
+    syte.fireEvent(new EventCheckoutStart(62.94, "EUR", products, "checkout"));
 
 # Text Search
 

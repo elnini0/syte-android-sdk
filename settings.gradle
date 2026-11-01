@@ -1,3 +1,5 @@
 rootProject.name = "Android-SDK"
 include ':app'
 include ':android-sdk'
+include ':syte-ui'
+include ':demo'

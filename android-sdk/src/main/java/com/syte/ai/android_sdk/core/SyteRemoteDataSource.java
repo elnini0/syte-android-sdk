@@ -616,13 +616,15 @@ class SyteRemoteDataSource extends BaseRemoteDataSource {
 
     /**
      * Detection responses are keyed by the image's URL, which for uploaded photos isn't known
-     * in advance. Re-key the single entry as "bounds" so it maps onto {@link BoundsResult}.
+     * in advance. Re-key the single entry as "bounds" so it maps onto {@link BoundsResult}, and
+     * keep the key as "imageUrl": for photos it's where Syte stored the upload.
      */
     static String normalizeBoundsJson(String responseString) {
         JsonObject json = JsonParser.parseString(responseString).getAsJsonObject();
         JsonObject normalized = new JsonObject();
         for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
             normalized.add("bounds", entry.getValue());
+            normalized.addProperty("imageUrl", entry.getKey());
             break;
         }
         return normalized.toString();
