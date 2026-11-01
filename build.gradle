@@ -13,6 +13,10 @@ buildscript {
     }
 }
 
+// Gives the root build a publishToMavenLocal task. Without one, JitPack adds a second publication
+// to each library, and the UI kit's dependency on the SDK can't be resolved.
+apply plugin: 'maven-publish'
+
 allprojects {
     repositories {
         google()

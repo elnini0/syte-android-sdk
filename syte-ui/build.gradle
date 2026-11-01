@@ -37,7 +37,8 @@ afterEvaluate {
                 from components.release
                 groupId 'com.github.elnini0'
                 artifactId 'syte-android-ui'
-                version '2.0.0'
+                // JitPack passes the tag or commit being built as the version.
+                version project.version == 'unspecified' ? '2.0.0' : project.version
             }
         }
     }
