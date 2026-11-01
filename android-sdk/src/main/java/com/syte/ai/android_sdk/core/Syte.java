@@ -7,6 +7,12 @@ import com.syte.ai.android_sdk.data.CropCoordinates;
 import com.syte.ai.android_sdk.data.ImageSearch;
 import com.syte.ai.android_sdk.data.BoughtTogether;
 import com.syte.ai.android_sdk.data.Personalization;
+import com.syte.ai.android_sdk.data.result.discovery.ShoppableGalleryResult;
+import com.syte.ai.android_sdk.data.result.discovery.RecentlyViewedResult;
+import com.syte.ai.android_sdk.data.result.discovery.CollectionResult;
+import com.syte.ai.android_sdk.data.ShoppableGallery;
+import com.syte.ai.android_sdk.data.RecentlyViewed;
+import com.syte.ai.android_sdk.data.MerchandisingCollection;
 import com.syte.ai.android_sdk.data.ShopTheLook;
 import com.syte.ai.android_sdk.data.SimilarItems;
 import com.syte.ai.android_sdk.data.TextSearch;
@@ -250,6 +256,83 @@ public abstract class Syte {
             BoughtTogether boughtTogether,
             SyteCallback<PersonalizationResult> callback
     );
+
+    /**
+     * Retrieves the shopper's recently viewed products from Syte, most recent first.
+     * The list belongs to this SDK's shopper ID ({@link SyteConfiguration#getUserId()}).
+     * Synchronous method. Must NOT be called on the UI thread!
+     * @param request {@link RecentlyViewed}
+     * @return {@link SyteResult}
+     */
+    public abstract SyteResult<RecentlyViewedResult> getRecentlyViewed(RecentlyViewed request);
+
+    /**
+     * Asynchronous equivalent for the {@link #getRecentlyViewed(RecentlyViewed)} method.
+     * @param request {@link RecentlyViewed}
+     * @param callback {@link SyteCallback}
+     */
+    public abstract void getRecentlyViewedAsync(RecentlyViewed request, SyteCallback<RecentlyViewedResult> callback);
+
+    /**
+     * Removes a product from the shopper's recently viewed list.
+     * Synchronous method. Must NOT be called on the UI thread!
+     * @param sku product to remove
+     * @return {@link SyteResult}
+     */
+    public abstract SyteResult<Boolean> removeRecentlyViewed(String sku);
+
+    /**
+     * Asynchronous equivalent for the {@link #removeRecentlyViewed(String)} method.
+     * @param sku product to remove
+     * @param callback {@link SyteCallback}
+     */
+    public abstract void removeRecentlyViewedAsync(String sku, SyteCallback<Boolean> callback);
+
+    /**
+     * Moves another shopper ID's recently viewed history into this one, for example the history a
+     * shopper built on another device before signing in.
+     * Synchronous method. Must NOT be called on the UI thread!
+     * @param fromUserId shopper ID whose history is merged in
+     * @return {@link SyteResult}
+     */
+    public abstract SyteResult<Boolean> mergeRecentlyViewed(String fromUserId);
+
+    /**
+     * Asynchronous equivalent for the {@link #mergeRecentlyViewed(String)} method.
+     * @param fromUserId shopper ID whose history is merged in
+     * @param callback {@link SyteCallback}
+     */
+    public abstract void mergeRecentlyViewedAsync(String fromUserId, SyteCallback<Boolean> callback);
+
+    /**
+     * Retrieves a page of a merchandising collection's products.
+     * Synchronous method. Must NOT be called on the UI thread!
+     * @param collection {@link MerchandisingCollection}
+     * @return {@link SyteResult}
+     */
+    public abstract SyteResult<CollectionResult> getCollection(MerchandisingCollection collection);
+
+    /**
+     * Asynchronous equivalent for the {@link #getCollection(MerchandisingCollection)} method.
+     * @param collection {@link MerchandisingCollection}
+     * @param callback {@link SyteCallback}
+     */
+    public abstract void getCollectionAsync(MerchandisingCollection collection, SyteCallback<CollectionResult> callback);
+
+    /**
+     * Retrieves a shoppable gallery: images with the products tagged on them.
+     * Synchronous method. Must NOT be called on the UI thread!
+     * @param gallery {@link ShoppableGallery}
+     * @return {@link SyteResult}
+     */
+    public abstract SyteResult<ShoppableGalleryResult> getShoppableGallery(ShoppableGallery gallery);
+
+    /**
+     * Asynchronous equivalent for the {@link #getShoppableGallery(ShoppableGallery)} method.
+     * @param gallery {@link ShoppableGallery}
+     * @param callback {@link SyteCallback}
+     */
+    public abstract void getShoppableGalleryAsync(ShoppableGallery gallery, SyteCallback<ShoppableGalleryResult> callback);
 
     /**
      * Retrieves the most popular searches for the specified language.

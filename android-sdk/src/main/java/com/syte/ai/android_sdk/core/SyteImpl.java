@@ -6,6 +6,12 @@ import com.syte.ai.android_sdk.data.CropCoordinates;
 import com.syte.ai.android_sdk.data.ImageSearch;
 import com.syte.ai.android_sdk.data.BoughtTogether;
 import com.syte.ai.android_sdk.data.Personalization;
+import com.syte.ai.android_sdk.data.result.discovery.ShoppableGalleryResult;
+import com.syte.ai.android_sdk.data.result.discovery.RecentlyViewedResult;
+import com.syte.ai.android_sdk.data.result.discovery.CollectionResult;
+import com.syte.ai.android_sdk.data.ShoppableGallery;
+import com.syte.ai.android_sdk.data.RecentlyViewed;
+import com.syte.ai.android_sdk.data.MerchandisingCollection;
 import com.syte.ai.android_sdk.data.ShopTheLook;
 import com.syte.ai.android_sdk.data.SimilarItems;
 import com.syte.ai.android_sdk.data.TextSearch;
@@ -40,6 +46,7 @@ class SyteImpl extends Syte {
     private SyteConfiguration mConfiguration;
     private final SyteRemoteDataSource mRemoteDataSource;
     private final EventsRemoteDataSource mEventsRemoteDataSource;
+    private final DiscoveryRemoteDataSource mDiscoveryRemoteDataSource;
     private final TextSearchClientImpl mTextSearchClient;
     private final ImageSearchClientImpl mImageSearchClient;
     private ProductRecommendationClientImpl mProductRecommendationClient = null;
@@ -48,6 +55,7 @@ class SyteImpl extends Syte {
         mConfiguration = configuration;
         mRemoteDataSource = new SyteRemoteDataSource(mConfiguration);
         mEventsRemoteDataSource = new EventsRemoteDataSource(mConfiguration);
+        mDiscoveryRemoteDataSource = new DiscoveryRemoteDataSource(mConfiguration);
         mTextSearchClient = new TextSearchClientImpl(
                 mRemoteDataSource,
                 mConfiguration.getAllowAutoCompletionQueue()
@@ -72,6 +80,7 @@ class SyteImpl extends Syte {
         mConfiguration = configuration;
         mRemoteDataSource.setConfiguration(configuration);
         mEventsRemoteDataSource.setConfiguration(configuration);
+        mDiscoveryRemoteDataSource.setConfiguration(configuration);
         mTextSearchClient.setAllowAutoCompletionQueue(configuration.getAllowAutoCompletionQueue());
     }
 
@@ -217,6 +226,66 @@ class SyteImpl extends Syte {
     public void getBoughtTogetherAsync(BoughtTogether boughtTogether, SyteCallback<PersonalizationResult> callback) {
         verifyInitialized();
         mProductRecommendationClient.getBoughtTogetherAsync(boughtTogether, callback);
+    }
+
+    @Override
+    public SyteResult<RecentlyViewedResult> getRecentlyViewed(RecentlyViewed request) {
+        verifyInitialized();
+        return mDiscoveryRemoteDataSource.getRecentlyViewed(request);
+    }
+
+    @Override
+    public void getRecentlyViewedAsync(RecentlyViewed request, SyteCallback<RecentlyViewedResult> callback) {
+        verifyInitialized();
+        mDiscoveryRemoteDataSource.getRecentlyViewedAsync(request, callback);
+    }
+
+    @Override
+    public SyteResult<Boolean> removeRecentlyViewed(String sku) {
+        verifyInitialized();
+        return mDiscoveryRemoteDataSource.removeRecentlyViewed(sku);
+    }
+
+    @Override
+    public void removeRecentlyViewedAsync(String sku, SyteCallback<Boolean> callback) {
+        verifyInitialized();
+        mDiscoveryRemoteDataSource.removeRecentlyViewedAsync(sku, callback);
+    }
+
+    @Override
+    public SyteResult<Boolean> mergeRecentlyViewed(String fromUserId) {
+        verifyInitialized();
+        return mDiscoveryRemoteDataSource.mergeRecentlyViewed(fromUserId);
+    }
+
+    @Override
+    public void mergeRecentlyViewedAsync(String fromUserId, SyteCallback<Boolean> callback) {
+        verifyInitialized();
+        mDiscoveryRemoteDataSource.mergeRecentlyViewedAsync(fromUserId, callback);
+    }
+
+    @Override
+    public SyteResult<CollectionResult> getCollection(MerchandisingCollection collection) {
+        verifyInitialized();
+        return mDiscoveryRemoteDataSource.getCollection(collection);
+    }
+
+    @Override
+    public void getCollectionAsync(MerchandisingCollection collection, SyteCallback<CollectionResult> callback) {
+        verifyInitialized();
+        mDiscoveryRemoteDataSource.getCollectionAsync(collection, callback);
+    }
+
+    @Override
+    public SyteResult<ShoppableGalleryResult> getShoppableGallery(ShoppableGallery gallery) {
+        verifyInitialized();
+        return mDiscoveryRemoteDataSource.getShoppableGallery(gallery);
+    }
+
+    @Override
+    public void getShoppableGalleryAsync(ShoppableGallery gallery, SyteCallback<ShoppableGalleryResult> callback) {
+        verifyInitialized();
+        mDiscoveryRemoteDataSource.getShoppableGalleryAsync(gallery, callback);
     }
 
     @Override

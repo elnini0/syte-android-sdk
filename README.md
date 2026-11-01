@@ -44,6 +44,8 @@ Live tests run on a device or emulator against a real account, and are skipped w
     -Pandroid.testInstrumentationRunnerArguments.syteApiKey=<api key>
 ```
 
+Recently viewed, collection and gallery live tests also need `syteTestDiscovery=true`, and `syteTestCollectionId` / `syteTestGalleryId` for the last two.
+
 Optional `syteTestQuery` and `syteTestLang` arguments (defaults `robe` and `fr_FR`) pick a search term that returns products for your account.
 
 ## Account Credentials
@@ -149,6 +151,32 @@ SyteResult<PersonalizationResult> result =
 ```
     
 **NOTE:** You must add at least one product ID to use the "Personalization" functionality. To do this use the **Syte.addViewedProduct(String)** method.
+
+# Recently viewed, collections and galleries
+
+These calls read data Syte keeps on its side, and need the features enabled on your account. They have not been tested against a live account yet: the test account available while building them answers 403.
+
+Recently viewed products for this SDK's shopper ID, most recent first:
+```java
+SyteResult<RecentlyViewedResult> viewed = syte.getRecentlyViewed(new RecentlyViewed());
+syte.removeRecentlyViewed("ABC123");
+syte.mergeRecentlyViewed("<another shopper ID>");
+```
+Syte builds this list from the shopper's activity; check with Syte which events feed it in an app.
+
+A merchandising collection's products, a page at a time:
+```java
+MerchandisingCollection collection = new MerchandisingCollection("<collection id>");
+collection.setSize(12);
+SyteResult<CollectionResult> page = syte.getCollection(collection);
+```
+
+A shoppable gallery, with the products tagged on each image:
+```java
+SyteResult<ShoppableGalleryResult> gallery = syte.getShoppableGallery(new ShoppableGallery("<gallery id>"));
+```
+
+Each has an `...Async` version that takes a `SyteCallback`. Products from these calls come back as `SyteProduct`, with getters for common fields and everything else in `getFields()`. Ask for other product fields with the request's `setFields`.
 
 # Personalized ranking
 
