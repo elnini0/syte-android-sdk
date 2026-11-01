@@ -17,7 +17,7 @@ Refresh of the 2021 SDK for current Android tooling and the current Syte API.
 ### Breaking
 
 - Shopper and session IDs move from encrypted shared preferences to plain app-private preferences. Apps upgrading from 1.x get a new shopper ID once.
-- Published as `com.github.elnini0:syte-android-sdk`.
+- Published through JitPack as `com.github.elnini0.syte-android-sdk:android-sdk`, with the UI kit next to it as `com.github.elnini0.syte-android-sdk:syte-ui`.
 
 ### Fixed
 

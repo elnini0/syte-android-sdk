@@ -22,7 +22,7 @@ dependencyResolutionManagement {
 
 ```groovy
 dependencies {
-    implementation 'com.github.elnini0:syte-android-sdk:2.0.0'
+    implementation 'com.github.elnini0.syte-android-sdk:android-sdk:2.0.0'
 }
 ```
 
@@ -34,7 +34,7 @@ Shrinking with R8 (`minifyEnabled true`) needs no extra rules: the library ships
 
 ```groovy
 dependencies {
-    implementation 'com.github.elnini0.syte-android-sdk:syte-android-ui:2.0.0'
+    implementation 'com.github.elnini0.syte-android-sdk:syte-ui:2.0.0'
 }
 ```
 
