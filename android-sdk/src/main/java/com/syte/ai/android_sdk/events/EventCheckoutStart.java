@@ -1,10 +1,11 @@
 package com.syte.ai.android_sdk.events;
 
-import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.syte.ai.android_sdk.enums.EventsTag;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This event should be sent to Syte every time a user starts a checkout process
@@ -39,7 +40,11 @@ public class EventCheckoutStart extends BaseSyteEvent {
 
     @Override
     public String getRequestBodyString() {
-        return new Gson().toJson(this, EventCheckoutStart.class);
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("value", formatAmount(mValue));
+        payload.put("currency", mCurrency);
+        payload.put("products", productsPayload(mProducts, true));
+        return rawDataBody(payload);
     }
 
 }

@@ -5,8 +5,6 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
-import androidx.security.crypto.EncryptedSharedPreferences;
-import androidx.security.crypto.MasterKey;
 
 import com.syte.ai.android_sdk.util.SyteLogger;
 
@@ -29,37 +27,16 @@ class SyteStorage {
     private static final String TEXT_SEARCH_TERM_KEY = "syte_text_search_term_pref";
 
     private static final int TEXT_SEARCH_TERM_COUNT = 50;
+    private static final String PREFS_NAME = "syte_sdk_prefs";
 
     @Nullable private SharedPreferences mSharedPreferences = null;
 
     private boolean mIsEnabled = true;
 
     SyteStorage(Context context) {
-
-        MasterKey masterKey = null;
-        try {
-            masterKey = new MasterKey
-                    .Builder(context)
-                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                    .build();
-        } catch (Exception e) {
-            SyteLogger.e(TAG, "Could not create MasterKey instance: " + e.getMessage());
-        }
-
-        try {
-            if (masterKey != null) {
-                mSharedPreferences = EncryptedSharedPreferences.create(
-                        context,
-                        "syte_shared_prefs",
-                        masterKey,
-                        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                );
-            }
-        } catch (Exception e) {
-            SyteLogger.e(TAG, "Error creating encrypted shared prefs instance: " + e.getMessage());
-        }
-
+        // Plain app-private prefs: these are IDs and SKUs, not secrets, and the encrypted
+        // prefs library the SDK used before is deprecated by Google.
+        mSharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         getSessionId();
 
     }

@@ -42,19 +42,18 @@ public class PersonalizationFragment extends BaseFragment implements View.OnClic
     public void onClick(View v) {
         Personalization personalization =
                 new Personalization();
-        switch (v.getId()) {
-            case R.id.personalization_btn:
-                mSyteManager.personalization(
-                        personalization,
-                        syteResult -> {
-                           if (syteResult.isSuccessful) {
-                               mSyteManager.setLastRetrievedItemsList(
-                                       syteResult.data.getItems()
-                               );
-                               mNavigator.offersFragment();
-                           }
-                        });
-                break;
+        int id = v.getId();
+        if (id == R.id.personalization_btn) {
+            mSyteManager.personalization(
+                    personalization,
+                    syteResult -> {
+                       if (syteResult.isSuccessful) {
+                           mSyteManager.setLastRetrievedItemsList(
+                                   syteResult.data.getItems()
+                           );
+                           mNavigator.offersFragment();
+                       }
+                    });
         }
     }
 }

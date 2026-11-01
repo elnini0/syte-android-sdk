@@ -3,6 +3,8 @@ package com.syte.ai.android_sdk.core;
 import android.text.TextUtils;
 import android.util.Pair;
 
+import com.google.gson.Gson;
+
 import com.syte.ai.android_sdk.data.result.account.SytePlatformSettings;
 
 import java.io.BufferedInputStream;
@@ -72,20 +74,7 @@ class Utils {
         if (filters.isEmpty()) {
             return null;
         }
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("{");
-        for (Map.Entry<String, List<String>> filter : filters.entrySet()) {
-            stringBuilder.append(String.format("\"%s\":[", filter.getKey()));
-            for (String filterValue : filter.getValue()) {
-                stringBuilder.append(String.format("\"%s\",", filterValue));
-            }
-            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-            stringBuilder.append("]");
-            stringBuilder.append(",");
-        }
-        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-        stringBuilder.append("}");
-        return stringBuilder.toString();
+        return new Gson().toJson(filters);
     }
 
 }

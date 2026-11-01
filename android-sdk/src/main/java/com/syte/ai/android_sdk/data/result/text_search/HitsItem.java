@@ -54,6 +54,9 @@ public class HitsItem{
 	@SerializedName("id")
 	private String id;
 
+	@SerializedName("sku")
+	private String sku;
+
 	@SerializedName("categories")
 	private List<String> categories;
 
@@ -125,6 +128,10 @@ public class HitsItem{
 
 	public String getId(){
 		return id;
+	}
+
+	public String getSku(){
+		return sku;
 	}
 
 	public List<String> getCategories(){

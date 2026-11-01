@@ -1,9 +1,14 @@
 package com.syte.ai.android_sdk.events;
 
+import com.google.gson.Gson;
 import com.syte.ai.android_sdk.enums.EventsTag;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Class represents Base Syte event. Extend this class and override {@link #getRequestBodyString()}
@@ -42,6 +47,33 @@ abstract public class BaseSyteEvent {
      * @return request body string
      */
     public abstract String getRequestBodyString();
+
+    /**
+     * Ecommerce events carry their data as a JSON string in rawData; Syte ignores it anywhere else.
+     */
+    protected static String rawDataBody(Map<String, Object> payload) {
+        Gson gson = new Gson();
+        return gson.toJson(Collections.singletonMap("rawData", gson.toJson(payload)));
+    }
+
+    /**
+     * Money amounts as Syte's event payloads expect them, e.g. "62.94".
+     */
+    protected static String formatAmount(double amount) {
+        return String.format(Locale.US, "%.2f", amount);
+    }
+
+    protected static List<Map<String, Object>> productsPayload(List<Product> products, boolean priceAsString) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (Product product : products) {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("sku", product.getSku());
+            item.put("quantity", product.getQuantity());
+            item.put("price", priceAsString ? formatAmount(product.getPrice()) : product.getPrice());
+            list.add(item);
+        }
+        return list;
+    }
 
     /**
      * Getter for event name

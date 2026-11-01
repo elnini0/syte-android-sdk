@@ -79,20 +79,19 @@ public class SimilarsFragment extends BaseFragment implements View.OnClickListen
         }
         similarProducts.setLimit(Integer.parseInt(mLimitET.getText().toString()));
         similarProducts.setSyteUrlReferer(mUrlRefererET.getText().toString());
-        switch (v.getId()) {
-            case R.id.similars_btn:
-                mSyteManager.getSimilars(
-                        similarProducts,
-                        syteResult -> {
-                            if (syteResult.isSuccessful) {
-                                mSyteManager.setLastRetrievedItemsList(
-                                        syteResult.data.getItems()
-                                );
-                                mNavigator.offersFragment();
-                            }
+        int id = v.getId();
+        if (id == R.id.similars_btn) {
+            mSyteManager.getSimilars(
+                    similarProducts,
+                    syteResult -> {
+                        if (syteResult.isSuccessful) {
+                            mSyteManager.setLastRetrievedItemsList(
+                                    syteResult.data.getItems()
+                            );
+                            mNavigator.offersFragment();
                         }
-                );
-                break;
+                    }
+            );
         }
     }
 }

@@ -52,7 +52,7 @@ class SyteRemoteDataSource extends BaseRemoteDataSource {
 
     private static final String TAG = SyteRemoteDataSource.class.getSimpleName();
 
-    private static final String SYTE_URL = "https://cdn.syteapi.com";
+    private static final String SYTE_URL = "https://cdn-api.syteapi.com";
     private static final String EXIF_REMOVAL_URL = "https://imagemod.syteapi.com";
 
     private interface BoundsResultCallback {

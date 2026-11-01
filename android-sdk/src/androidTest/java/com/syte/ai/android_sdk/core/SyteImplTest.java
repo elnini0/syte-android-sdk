@@ -76,8 +76,8 @@ public class SyteImplTest extends BaseTest {
     public void getConfiguration() {
         startSessionInternal();
         SyteConfiguration configuration = mSyte.getConfiguration();
-        assertEquals(configuration.getAccountId(), "9165");
-        assertEquals(configuration.getApiSignature(), "601c206d0a7f780efb9360f3");
+        assertEquals(configuration.getAccountId(), mConfiguration.getAccountId());
+        assertEquals(configuration.getApiSignature(), mConfiguration.getApiSignature());
         assertNotEquals((long) configuration.getSessionId(), -1L);
         assertNotNull(configuration.getUserId());
     }

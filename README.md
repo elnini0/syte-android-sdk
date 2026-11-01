@@ -1,41 +1,56 @@
 ## Syte Android SDK
 
-The Syte SDK allows you to build image detection, visual search, product recommendations and augmented search into your company's applications, enabling you to personalize your app experience for your users.
-This guide contains information about how to install and use the SDK for Android Apps.
+Data-only client for Syte's product discovery API: visual search, similar items, Shop the Look, personalized recommendations, text search and event tracking. It returns data; your app draws the screens.
 
-Note: This SDK requires Android API 21 or higher.
+Requires Android 5.0 (API 21) or higher. Built with Android Gradle Plugin 9.5 against Android 16 (API 36). See [CHANGELOG.md](CHANGELOG.md) for what changed in 2.0.
 
 ## Set up
 
-1. Add the JitPack repository to your build file
+1. Add the JitPack repository in `settings.gradle`:
 
-	`allprojects {
-		repositories {
-			maven { url 'https://jitpack.io' }
-		}
-	}`
-	
-2. Add the SDK dependency
+```groovy
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
 
-    `dependencies {
-	        implementation 'com.github.syte-ai:Android-SDK:<version>'
-	}`
-	
-For example:
+2. Add the SDK dependency:
 
-    dependencies {
-        implementation 'com.github.syte-ai:Android-SDK:1.0.0'
-	}
-	
-3. Sync your project
-4. In case the **minifyEnabled** is set to true in your build.gradle,
-add the following rule to your proguard-rules.pro file:
+```groovy
+dependencies {
+    implementation 'com.github.elnini0:syte-android-sdk:2.0.0'
+}
+```
 
-`-keep class com.syte.ai.android_sdk.data.** { *; }`
+JitPack only builds public repositories on its free plan. While this repository is private, build the library locally (`./gradlew :android-sdk:publishToMavenLocal`) and add `mavenLocal()` to your repositories instead.
+
+Shrinking with R8 (`minifyEnabled true`) needs no extra rules: the library ships its own.
+
+## Running the tests
+
+Offline tests:
+
+```
+./gradlew :android-sdk:testDebugUnitTest
+```
+
+Live tests run on a device or emulator against a real account, and are skipped without one:
+
+```
+./gradlew :android-sdk:connectedDebugAndroidTest \
+    -Pandroid.testInstrumentationRunnerArguments.syteAccountId=<account id> \
+    -Pandroid.testInstrumentationRunnerArguments.syteApiKey=<api key>
+```
+
+Optional `syteTestQuery` and `syteTestLang` arguments (defaults `robe` and `fr_FR`) pick a search term that returns products for your account.
 
 ## Account Credentials
 
-In order to use this SDK, please contact Syte for your account ID and signature.     
+In order to use this SDK, please contact Syte for your account ID and API key. The `signature` parameter below is your API key.     
 
 ## Use the SDK
 

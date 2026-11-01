@@ -1,11 +1,11 @@
 package com.syte.ai.android_sdk.events;
 
-import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.syte.ai.android_sdk.enums.EventsTag;
 
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This event should be sent to Syte every time a user adds a products to cart
@@ -29,6 +29,8 @@ public class EventProductsAddedToCart extends BaseSyteEvent {
 
     @Override
     public String getRequestBodyString() {
-        return new Gson().toJson(this, EventProductsAddedToCart.class);
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("products", productsPayload(mProducts, false));
+        return rawDataBody(payload);
     }
 }

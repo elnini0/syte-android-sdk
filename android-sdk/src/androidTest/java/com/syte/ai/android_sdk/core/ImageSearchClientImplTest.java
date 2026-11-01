@@ -17,6 +17,7 @@ import com.syte.ai.android_sdk.enums.SyteProductType;
 import com.syte.ai.android_sdk.exceptions.SyteGeneralException;
 
 import org.jetbrains.annotations.Nullable;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -338,6 +339,7 @@ public class ImageSearchClientImplTest extends BaseTest {
         assertEquals(result.resultCode, -1);
     }
 
+    @Ignore("Expects an exact number of detected items in a sample photo, which changes as detection models are updated. Covered by LiveApiTest.visualSearchFromPhoto.")
     @Test
     public void getBoundsWildPng() {
         startSessionInternal();

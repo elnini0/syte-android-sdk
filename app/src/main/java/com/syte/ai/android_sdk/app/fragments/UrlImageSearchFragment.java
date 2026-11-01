@@ -58,37 +58,36 @@ public class UrlImageSearchFragment extends BaseFragment implements View.OnClick
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.bounds_btn:
-                if (!validateInputs()) {
-                    showToast("Wrong input");
-                    return;
-                }
-                UrlImageSearch imageSearchRequestData = new UrlImageSearch(
-                        mImageUrlEditText.getText().toString(),
-                        SyteProductType.DISCOVERY_BUTTON
-                );
-                imageSearchRequestData.setRetrieveItemsForTheFirstBound(
-                        mFetchOffersForTheFirstBoundCheckBox.isChecked()
-                );
-                imageSearchRequestData.setSku(
-                        mSKUEditText.getText().toString()
-                );
-                if (!mSyteManager.getViewedProducts().isEmpty()) {
-                    imageSearchRequestData.setPersonalizedRanking(true);
-                }
-                mSyteManager.urlImageSearch(
-                        imageSearchRequestData,
-                        syteResult -> {
-                            if (syteResult.isSuccessful) {
-                                mSyteManager.setLastRetrievedBoundsList(
-                                        syteResult.data.getBounds()
-                                );
-                                mNavigator.boundsFragment();
-                            }
+        int id = v.getId();
+        if (id == R.id.bounds_btn) {
+            if (!validateInputs()) {
+                showToast("Wrong input");
+                return;
+            }
+            UrlImageSearch imageSearchRequestData = new UrlImageSearch(
+                    mImageUrlEditText.getText().toString(),
+                    SyteProductType.DISCOVERY_BUTTON
+            );
+            imageSearchRequestData.setRetrieveItemsForTheFirstBound(
+                    mFetchOffersForTheFirstBoundCheckBox.isChecked()
+            );
+            imageSearchRequestData.setSku(
+                    mSKUEditText.getText().toString()
+            );
+            if (!mSyteManager.getViewedProducts().isEmpty()) {
+                imageSearchRequestData.setPersonalizedRanking(true);
+            }
+            mSyteManager.urlImageSearch(
+                    imageSearchRequestData,
+                    syteResult -> {
+                        if (syteResult.isSuccessful) {
+                            mSyteManager.setLastRetrievedBoundsList(
+                                    syteResult.data.getBounds()
+                            );
+                            mNavigator.boundsFragment();
                         }
-                );
-                break;
+                    }
+            );
         }
     }
 }

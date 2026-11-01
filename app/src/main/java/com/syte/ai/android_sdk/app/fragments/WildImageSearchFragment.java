@@ -67,25 +67,23 @@ public class WildImageSearchFragment extends BaseFragment implements View.OnClic
         if (!mSyteManager.getViewedProducts().isEmpty()) {
             requestData.setPersonalizedRanking(true);
         }
-        switch (v.getId()) {
-            case R.id.load_image_btn:
-                Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-                photoPickerIntent.setType("image/*");
-                startActivityForResult(photoPickerIntent, RESULT_LOAD_IMG);
-                break;
-            case R.id.bounds_btn:
-                mSyteManager.wildImageSearch(
-                        requestData,
-                        syteResult -> {
-                            if (syteResult.isSuccessful) {
-                                mSyteManager.setLastRetrievedBoundsList(
-                                        syteResult.data.getBounds()
-                                );
-                                mNavigator.boundsFragment();
-                            }
+        int id = v.getId();
+        if (id == R.id.load_image_btn) {
+            Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+            photoPickerIntent.setType("image/*");
+            startActivityForResult(photoPickerIntent, RESULT_LOAD_IMG);
+        } else if (id == R.id.bounds_btn) {
+            mSyteManager.wildImageSearch(
+                    requestData,
+                    syteResult -> {
+                        if (syteResult.isSuccessful) {
+                            mSyteManager.setLastRetrievedBoundsList(
+                                    syteResult.data.getBounds()
+                            );
+                            mNavigator.boundsFragment();
                         }
-                );
-                break;
+                    }
+            );
         }
     }
 }

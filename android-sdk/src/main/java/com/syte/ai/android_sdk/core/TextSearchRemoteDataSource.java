@@ -191,6 +191,14 @@ class TextSearchRemoteDataSource extends BaseRemoteDataSource {
     private SyteResult<List<String>> onPopularSearchResult(
             Response<ResponseBody> result
     ) throws IOException, JSONException {
+        if (result.code() == 404) {
+            // The API answers 404 when the account has no popular searches yet.
+            SyteResult<List<String>> empty = new SyteResult<>();
+            empty.data = new ArrayList<>();
+            empty.resultCode = result.code();
+            empty.isSuccessful = true;
+            return empty;
+        }
         if (result.body() == null) {
             return handleEmptyBody(result);
         }
@@ -215,6 +223,14 @@ class TextSearchRemoteDataSource extends BaseRemoteDataSource {
     private SyteResult<AutoCompleteResult> onAutoCompleteResult(
             Response<ResponseBody> result
     ) throws IOException, JSONException {
+        if (result.code() == 404) {
+            // The API answers 404 when it has no suggestions for the query.
+            SyteResult<AutoCompleteResult> empty = new SyteResult<>();
+            empty.data = new AutoCompleteResult();
+            empty.resultCode = result.code();
+            empty.isSuccessful = true;
+            return empty;
+        }
         if (result.body() == null) {
             return handleEmptyBody(result, "Sorry! There are no results for the requests.");
         }

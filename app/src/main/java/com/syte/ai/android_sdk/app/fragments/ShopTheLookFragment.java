@@ -79,20 +79,19 @@ public class ShopTheLookFragment extends BaseFragment implements View.OnClickLis
         }
         shopTheLook.setLimitPerBound(Integer.parseInt(mLimitET.getText().toString()));
         shopTheLook.setSyteUrlReferer(mUrlRefererET.getText().toString());
-        switch (v.getId()) {
-            case R.id.ctl:
-                mSyteManager.shopTheLook(
-                        shopTheLook,
-                        syteResult -> {
-                            if (syteResult.isSuccessful) {
-                                mSyteManager.setLastRetrievedItemsList(
-                                        syteResult.data.getItemsForAllLabels(true)
-                                );
-                                mNavigator.offersFragment();
-                            }
+        int id = v.getId();
+        if (id == R.id.ctl) {
+            mSyteManager.shopTheLook(
+                    shopTheLook,
+                    syteResult -> {
+                        if (syteResult.isSuccessful) {
+                            mSyteManager.setLastRetrievedItemsList(
+                                    syteResult.data.getItemsForAllLabels(true)
+                            );
+                            mNavigator.offersFragment();
                         }
-                );
-                break;
+                    }
+            );
         }
     }
 }

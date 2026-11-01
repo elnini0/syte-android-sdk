@@ -12,6 +12,7 @@ import com.syte.ai.android_sdk.enums.RecommendationReturnField;
 import com.syte.ai.android_sdk.exceptions.SyteWrongInputException;
 
 import org.jetbrains.annotations.Nullable;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;
@@ -245,6 +246,7 @@ public class ProductRecommendationClientImplTest extends BaseTest {
         latch.await();
     }
 
+    @Ignore("Written for the retired demo account: hard-coded SKU and a product image link that expired in 2023. Covered by LiveApiTest.recommendations.")
     @Test
     public void getShopTheLook() {
         startSessionInternal();
@@ -299,6 +301,7 @@ public class ProductRecommendationClientImplTest extends BaseTest {
         assertEquals(result.resultCode, -1);
     }
 
+    @Ignore("Written for the retired demo account: hard-coded SKU and a product image link that expired in 2023. Covered by LiveApiTest.recommendations.")
     @Test
     public void getShopTheLookWithNonDefaultLimit() {
         startSessionInternal();
@@ -313,6 +316,7 @@ public class ProductRecommendationClientImplTest extends BaseTest {
         assertEquals(result.resultCode, 200);
     }
 
+    @Ignore("Written for the retired demo account: hard-coded SKU and a product image link that expired in 2023. Covered by LiveApiTest.recommendations.")
     @Test
     public void getShopTheLookWithNonDefaultUrlReferer() {
         startSessionInternal();
@@ -328,6 +332,7 @@ public class ProductRecommendationClientImplTest extends BaseTest {
         assertEquals(result.data.getItems().get(0).getItems().size(), 3);
     }
 
+    @Ignore("Written for the retired demo account: hard-coded SKU and a product image link that expired in 2023. Covered by LiveApiTest.recommendations.")
     @Test
     public void getShopTheLookWithNonDefaultOriginalItem() {
         startSessionInternal();
@@ -343,6 +348,7 @@ public class ProductRecommendationClientImplTest extends BaseTest {
         assertEquals(result.data.getItems().get(0).getItems().size(), 3);
     }
 
+    @Ignore("Written for the retired demo account: hard-coded SKU and a product image link that expired in 2023. Covered by LiveApiTest.recommendations.")
     @Test
     public void getShopTheLookWithNonDefaultReturnFieldsSku() {
         startSessionInternal();
@@ -361,6 +367,7 @@ public class ProductRecommendationClientImplTest extends BaseTest {
         assertNotNull(result.data.getItems().get(0).getItems().get(0).getSku());
     }
 
+    @Ignore("Written for the retired demo account: hard-coded SKU and a product image link that expired in 2023. Covered by LiveApiTest.recommendations.")
     @Test
     public void getShopTheLookWithNonDefaultReturnFieldsImageUrl() {
         startSessionInternal();
@@ -379,6 +386,7 @@ public class ProductRecommendationClientImplTest extends BaseTest {
         assertNotNull(result.data.getItems().get(0).getItems().get(0).getImageUrl());
     }
 
+    @Ignore("Written for the retired demo account: hard-coded SKU and a product image link that expired in 2023. Covered by LiveApiTest.recommendations.")
     @Test
     public void getShopTheLookWithNonDefaultReturnFieldsImageUrlAndSku() {
         startSessionInternal();
@@ -397,6 +405,7 @@ public class ProductRecommendationClientImplTest extends BaseTest {
         assertNotNull(result.data.getItems().get(0).getItems().get(0).getSku());
     }
 
+    @Ignore("Written for the retired demo account: hard-coded SKU and a product image link that expired in 2023. Covered by LiveApiTest.recommendations.")
     @Test
     public void getShopTheLookNonDefaultLimitPerBound() {
         startSessionInternal();
@@ -413,6 +422,7 @@ public class ProductRecommendationClientImplTest extends BaseTest {
         assertEquals(result.data.getItems().get(0).getItems().size(), 4);
     }
 
+    @Ignore("Written for the retired demo account: hard-coded SKU and a product image link that expired in 2023. Covered by LiveApiTest.recommendations.")
     @Test
     public void getShopTheLookAllOffers() {
         startSessionInternal();
@@ -431,6 +441,7 @@ public class ProductRecommendationClientImplTest extends BaseTest {
         assertEquals(result.data.getItemsForAllLabels(false).get(1).getBbCategories().get(0), "Trousers");
     }
 
+    @Ignore("Written for the retired demo account: hard-coded SKU and a product image link that expired in 2023. Covered by LiveApiTest.recommendations.")
     @Test
     public void getShopTheLookAllOffersZipEnabled() {
         startSessionInternal();
@@ -449,6 +460,7 @@ public class ProductRecommendationClientImplTest extends BaseTest {
         assertEquals(result.data.getItemsForAllLabels(true).get(1).getBbCategories().get(0), "Necklaces");
     }
 
+    @Ignore("Written for the retired demo account: hard-coded SKU and a product image link that expired in 2023. Covered by LiveApiTest.recommendations.")
     @Test
     public void getShopTheLookAsync() throws InterruptedException {
         startSessionInternal();
