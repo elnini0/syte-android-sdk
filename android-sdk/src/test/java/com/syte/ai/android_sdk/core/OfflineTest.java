@@ -1,5 +1,6 @@
 package com.syte.ai.android_sdk.core;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -17,6 +18,7 @@ import com.syte.ai.android_sdk.events.Product;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -90,6 +92,40 @@ public class OfflineTest {
         JsonObject normalized = JsonParser.parseString(SyteRemoteDataSource.normalizeBoundsJson(response)).getAsJsonObject();
         assertEquals("Coats", normalized.getAsJsonArray("bounds").get(0).getAsJsonObject().get("label").getAsString());
         assertEquals("https://uploads.example.com/abc_1", normalized.get("imageUrl").getAsString());
+    }
+
+    @Test
+    public void photosKeepTheirProportionsWhenShrunk() {
+        assertArrayEquals(new int[]{1050, 1400}, ImageProcessor.fitInside(3024, 4032, 1400f, 1400f));
+        assertArrayEquals(new int[]{1400, 1050}, ImageProcessor.fitInside(4032, 3024, 1400f, 1400f));
+        assertArrayEquals("small photos aren't enlarged", new int[]{350, 514}, ImageProcessor.fitInside(350, 514, 1400f, 1400f));
+    }
+
+    @Test
+    public void photosUploadAtTheBestQualityUnderTheLimit() {
+        List<Integer> tried = new ArrayList<>();
+        // Pretend each quality step costs 100 KB: 90 is 900 KB, 30 is 300 KB.
+        byte[] bytes = ImageProcessor.encodeUnder(300_000, quality -> {
+            tried.add(quality);
+            return new byte[quality * 10_000];
+        });
+        assertEquals(Arrays.asList(90, 80, 70, 60, 50, 40, 30), tried);
+        assertEquals(300_000, bytes.length);
+
+        tried.clear();
+        ImageProcessor.encodeUnder(300_000, quality -> {
+            tried.add(quality);
+            return new byte[50_000];
+        });
+        assertEquals("a photo that fits first time is saved once", Arrays.asList(90), tried);
+
+        tried.clear();
+        byte[] huge = ImageProcessor.encodeUnder(300_000, quality -> {
+            tried.add(quality);
+            return new byte[1_000_000];
+        });
+        assertEquals("quality never drops below 20", Integer.valueOf(20), tried.get(tried.size() - 1));
+        assertEquals(1_000_000, huge.length);
     }
 
     @Test

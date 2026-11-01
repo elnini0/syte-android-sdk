@@ -646,23 +646,10 @@ class SyteRemoteDataSource extends BaseRemoteDataSource {
                 context,
                 requestData.getImageUri()
         );
-
-        File notCompressedImage = new File(requestData.getImageUri().toString());
-        long size = 0;
-        if (notCompressedImage.exists()) {
-            size = notCompressedImage.length();
+        if (bitmap == null) {
+            throw new SyteGeneralException("Could not read the photo.");
         }
-
-        File file = imageProcessor.compress(
-                context,
-                size,
-                bitmap,
-                requestData.getImageScale()
-        );
-
-        SyteLogger.i(TAG, "Compressed image size: " + file.length() + " bytes");
-
-        return Utils.getFileBytes(file);
+        return imageProcessor.compress(bitmap, requestData.getImageScale());
     }
 
 }

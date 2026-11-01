@@ -24,6 +24,7 @@ Refresh of the 2021 SDK for current Android tooling and the current Syte API.
 - The project could not build on Apple Silicon Macs without Rosetta, because Android Gradle Plugin 4.2's resource tool is Intel-only. Now on Android Gradle Plugin 9.5, Gradle 9.8 and Java 17.
 - Apps that shrink their release build with R8 failed to build, and once fixed the shrinker stripped the SDK's data classes so results came back empty. The library now ships consumer rules and is published unshrunk.
 - Purchase, checkout and add-to-cart events now send their data inside `rawData`, as Syte's event API requires. Before, purchases were not counted.
+- Photo searches uploaded every photo at about 1000 pixels and JPEG quality 20, around 10 KB, whatever its size. The size check couldn't read gallery or camera photos, so every photo got the smallest setting. Photos now go up at up to 1400 pixels with their proportions kept, at the best quality that stays under 300 KB (25 to 110 KB in tests), the same approach as iOS.
 - Autocomplete and popular searches returned an error when there were simply no results. They now return an empty result.
 - Search filter values with quotes produced malformed JSON. Filters are now serialized with Gson.
 - Search hits now include their `sku`.
@@ -36,5 +37,6 @@ Refresh of the 2021 SDK for current Android tooling and the current Syte API.
 - Calls go to `cdn-api.syteapi.com`, the host in Syte's current API docs.
 - Visual search, recommendation and event calls also send the API key in the `x-api-key` header, as the docs describe. Text search keeps the `sig` parameter, since those endpoints reject the header.
 - Removed the manual AAR zip distribution; install through JitPack.
+- Dropped the image compression library. Photo searches also no longer leave a copy of each photo in the app's files.
 - Dropped the deprecated `androidx.security:security-crypto` dependency and the shut-down JCenter repository. Updated Retrofit, Gson, OkHttp and ExifInterface.
 - Added offline unit tests, and live device tests that run against a real account when credentials are passed in.
