@@ -24,6 +24,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+    // JitPack publishes this variant itself, named after the module, versioned by the tag.
     publishing {
         singleVariant('release') {
             withSourcesJar()
@@ -31,19 +32,6 @@ android {
     }
 }
 
-afterEvaluate {
-    publishing {
-        publications {
-            release(MavenPublication) {
-                from components.release
-                groupId 'com.github.elnini0'
-                artifactId 'syte-android-sdk'
-                // JitPack passes the tag or commit being built as the version.
-                version project.version == 'unspecified' ? '2.0.0' : project.version
-            }
-        }
-    }
-}
 
 dependencies {
 
